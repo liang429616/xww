@@ -7,3 +7,6 @@ vite.config.d.ts
 .edge-headless/
 *-preview.png
 cute-*.png
+.vercel/
+
+.vercel

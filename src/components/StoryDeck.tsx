@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import confetti from "canvas-confetti";
 import { birthdayConfig as config } from "../data";
 import { Bear, Bunny, Cake, Cloud, FlowerPatch, Rainbow } from "./CuteIllustrations";
 
 const slideNames = ["开场", "时光线", "喜欢", "时光", "给你的信", "生日快乐"];
+const heartConfetti = confetti.shapeFromText({ text: "💗", scalar: 2 });
 
 function getInitialPage() {
   const requested = Number(new URLSearchParams(window.location.search).get("page"));
@@ -27,17 +29,34 @@ function PhotoCard({ src, label, className = "" }: { src?: string; label: string
 export function StoryDeck() {
   const [current, setCurrent] = useState(getInitialPage);
   const [musicPlaying, setMusicPlaying] = useState(false);
+  const [trackIndex, setTrackIndex] = useState(0);
   const [cakeStage, setCakeStage] = useState<"ready" | "lit" | "wish" | "party">("ready");
   const [memoryIndex, setMemoryIndex] = useState(0);
   const currentRef = useRef(getInitialPage());
   const memoryIndexRef = useRef(0);
   const wheelLocked = useRef(false);
   const wheelRelease = useRef<number | null>(null);
+  const celebrationFrame = useRef<number | null>(null);
+  const celebrationTimers = useRef<number[]>([]);
   const touchStart = useRef(0);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const musicTracks = config.musicPlaylist;
+  const hasMusic = musicTracks.length > 0;
 
   useEffect(() => { currentRef.current = current; }, [current]);
   useEffect(() => { memoryIndexRef.current = memoryIndex; }, [memoryIndex]);
+
+  const stopCelebration = useCallback(() => {
+    if (celebrationFrame.current !== null) {
+      window.cancelAnimationFrame(celebrationFrame.current);
+      celebrationFrame.current = null;
+    }
+    celebrationTimers.current.forEach((timer) => window.clearTimeout(timer));
+    celebrationTimers.current = [];
+    confetti.reset();
+  }, []);
+
+  useEffect(() => stopCelebration, [stopCelebration]);
 
   const goTo = useCallback((index: number) => {
     const next = Math.max(0, Math.min(slideNames.length - 1, index));
@@ -92,20 +111,193 @@ export function StoryDeck() {
   }, [goTo, turnPage]);
 
   useEffect(() => {
-    if (!config.musicSrc || !audioRef.current) return;
+    if (!hasMusic || !audioRef.current) return;
     if (musicPlaying) audioRef.current.play().catch(() => setMusicPlaying(false));
     else audioRef.current.pause();
-  }, [musicPlaying]);
+  }, [hasMusic, musicPlaying, trackIndex]);
 
   const handleStart = () => {
-    if (config.musicSrc) setMusicPlaying(true);
+    if (hasMusic) {
+      audioRef.current?.play().then(() => setMusicPlaying(true)).catch(() => setMusicPlaying(false));
+    }
     memoryIndexRef.current = 0;
     setMemoryIndex(0);
     goTo(1);
   };
 
+  const toggleMusic = () => {
+    if (!hasMusic || !audioRef.current) return;
+    if (musicPlaying) {
+      audioRef.current.pause();
+      setMusicPlaying(false);
+      return;
+    }
+    audioRef.current.play().then(() => setMusicPlaying(true)).catch(() => setMusicPlaying(false));
+  };
+
+  const playNextTrack = () => {
+    setTrackIndex((index) => (index + 1) % musicTracks.length);
+  };
+
+  const fireCelebration = useCallback(() => {
+    stopCelebration();
+    const colors = ["#f493a4", "#ffd66f", "#8bcdb2", "#9fd4ef", "#bba7df", "#fff5dc"];
+    const shared = {
+      colors,
+      disableForReducedMotion: true,
+      zIndex: 80,
+    };
+
+    // 蛋糕上方的主礼花：先集中喷出，再自然散落。
+    void confetti({
+      ...shared,
+      particleCount: 145,
+      spread: 118,
+      startVelocity: 56,
+      decay: 0.91,
+      gravity: 0.92,
+      ticks: 260,
+      origin: { x: 0.66, y: 0.61 },
+      shapes: ["circle", "square", "star"],
+      scalar: 1.05,
+    });
+
+    // 稍后从顶部落下一层较轻的彩纸，增加纵深感。
+    celebrationTimers.current.push(window.setTimeout(() => {
+      void confetti({
+        ...shared,
+        particleCount: 125,
+        spread: 170,
+        startVelocity: 24,
+        decay: 0.94,
+        gravity: 0.62,
+        ticks: 340,
+        origin: { x: 0.55, y: 0.02 },
+        shapes: ["circle", "square"],
+        scalar: 0.86,
+      });
+    }, 280));
+
+    // 心形和星星给“愿望送达”一个清晰的收尾。
+    celebrationTimers.current.push(window.setTimeout(() => {
+      void confetti({
+        ...shared,
+        particleCount: 58,
+        spread: 360,
+        startVelocity: 34,
+        decay: 0.92,
+        gravity: 0.35,
+        ticks: 210,
+        origin: { x: 0.67, y: 0.46 },
+        shapes: ["star"],
+        scalar: 1.15,
+      });
+      void confetti({
+        ...shared,
+        particleCount: 18,
+        spread: 115,
+        startVelocity: 29,
+        gravity: 0.55,
+        ticks: 230,
+        origin: { x: 0.67, y: 0.48 },
+        shapes: [heartConfetti],
+        scalar: 1.35,
+      });
+    }, 820));
+
+    // 持续庆祝：礼炮、随机烟花和顶部闪片分层循环，离开页面时才停止。
+    let lastSideAt = 0;
+    let lastFireworkAt = 0;
+    let lastShowerAt = 0;
+    let fireworkCount = 0;
+    const celebrateForever = (now: number) => {
+      if (now - lastSideAt > 520) {
+        lastSideAt = now;
+        void confetti({
+          ...shared,
+          particleCount: 8,
+          angle: 58,
+          spread: 54,
+          startVelocity: 44,
+          gravity: 0.86,
+          ticks: 250,
+          origin: { x: 0.02, y: 0.78 },
+        });
+        void confetti({
+          ...shared,
+          particleCount: 8,
+          angle: 122,
+          spread: 54,
+          startVelocity: 44,
+          gravity: 0.86,
+          ticks: 250,
+          origin: { x: 0.98, y: 0.78 },
+        });
+      }
+
+      if (now - lastFireworkAt > 1450) {
+        lastFireworkAt = now;
+        fireworkCount += 1;
+        const origin = { x: 0.16 + Math.random() * 0.7, y: 0.16 + Math.random() * 0.34 };
+        void confetti({
+          ...shared,
+          particleCount: 44,
+          spread: 360,
+          startVelocity: 31,
+          decay: 0.92,
+          gravity: 0.38,
+          ticks: 220,
+          origin,
+          shapes: ["star", "circle"],
+          scalar: 1.05,
+        });
+        if (fireworkCount % 3 === 0) {
+          void confetti({
+            ...shared,
+            particleCount: 10,
+            spread: 150,
+            startVelocity: 25,
+            gravity: 0.48,
+            ticks: 220,
+            origin,
+            shapes: [heartConfetti],
+            scalar: 1.2,
+          });
+        }
+      }
+
+      if (now - lastShowerAt > 760) {
+        lastShowerAt = now;
+        void confetti({
+          ...shared,
+          particleCount: 9,
+          spread: 80,
+          startVelocity: 7,
+          decay: 0.96,
+          gravity: 0.45,
+          ticks: 360,
+          origin: { x: Math.random(), y: -0.03 },
+          shapes: ["circle", "square"],
+          scalar: 0.72,
+        });
+      }
+
+      celebrationFrame.current = window.requestAnimationFrame(celebrateForever);
+    };
+    celebrationFrame.current = window.requestAnimationFrame(celebrateForever);
+  }, [stopCelebration]);
+
+  useEffect(() => {
+    if (current === slideNames.length - 1 && cakeStage === "party") fireCelebration();
+    else stopCelebration();
+  }, [cakeStage, current, fireCelebration, stopCelebration]);
+
   const advanceCake = () => {
-    setCakeStage((stage) => stage === "ready" ? "lit" : stage === "lit" ? "wish" : "party");
+    if (cakeStage === "ready") setCakeStage("lit");
+    else if (cakeStage === "lit") setCakeStage("wish");
+    else if (cakeStage === "wish") {
+      setCakeStage("party");
+    }
   };
 
   const slideClass = (index: number) => {
@@ -128,10 +320,10 @@ export function StoryDeck() {
       <header className="deck-header">
         <button className="deck-brand" onClick={() => goTo(0)} type="button"><span>♡</span> 与你有关的甜甜时光</button>
         <div className="deck-progress"><i style={{ width: `${((current + 1) / slideNames.length) * 100}%` }} /></div>
-        <button className="music-pill" type="button" onClick={() => config.musicSrc && setMusicPlaying((value) => !value)} title={config.musicSrc ? "播放或暂停音乐" : "在 src/data.ts 添加背景音乐"}>
-          <span className={musicPlaying ? "music-bounce" : ""}>♪</span>{config.musicSrc ? (musicPlaying ? "音乐播放中" : "播放音乐") : "等待一首歌"}
+        <button className="music-pill" type="button" onClick={toggleMusic} title={hasMusic ? "播放或暂停音乐" : "在 src/data.ts 添加背景音乐"}>
+          <span className={musicPlaying ? "music-bounce" : ""}>♪</span>{hasMusic ? (musicPlaying ? `音乐 ${trackIndex + 1}/${musicTracks.length}` : "播放音乐") : "等待一首歌"}
         </button>
-        {config.musicSrc && <audio ref={audioRef} src={config.musicSrc} loop preload="metadata" />}
+        {hasMusic && <audio ref={audioRef} src={musicTracks[trackIndex]} onEnded={playNextTrack} onError={playNextTrack} preload="metadata" />}
       </header>
 
       <section className={`${slideClass(0)} hero-slide`} aria-hidden={current !== 0}>
@@ -256,19 +448,7 @@ export function StoryDeck() {
         </article>
       </section>
 
-      <section className={`${slideClass(5)} party-slide ${cakeStage === "party" ? "is-party" : ""}`} aria-hidden={current !== 5}>
-        <div className="confetti" aria-hidden="true">
-          {Array.from({ length: 84 }, (_, index) => (
-            <i key={index} style={{
-              "--x": `${(index * 37) % 101}%`,
-              "--delay": `${-((index * 0.073) % 3.4)}s`,
-              "--duration": `${2.5 + (index % 7) * 0.18}s`,
-              "--drift": `${(index % 2 ? 1 : -1) * (24 + (index % 5) * 13)}px`,
-            } as CSSProperties} />
-          ))}
-        </div>
-        <div className="celebration-bursts" aria-hidden="true">{Array.from({ length: 7 }, (_, index) => <i key={index} />)}</div>
-        <div className="party-ribbons" aria-hidden="true">{Array.from({ length: 10 }, (_, index) => <i key={index} />)}</div>
+      <section className={`${slideClass(5)} party-slide`} aria-hidden={current !== 5}>
         <div className="party-copy">
           <span className="sticker-label">HAPPY BIRTHDAY!</span>
           <h2>生日快乐，<br /><em>{config.herName}</em></h2>
@@ -283,7 +463,7 @@ export function StoryDeck() {
           <Bear className="party-bear" />
           <div className="party-balloons"><i /><i /><i /><span /></div>
         </div>
-        <button className="replay-cute" type="button" onClick={() => { setCakeStage("ready"); goTo(0); }}>↺ 再看一遍</button>
+        <button className="replay-cute" type="button" onClick={() => { stopCelebration(); setCakeStage("ready"); goTo(0); }}>↺ 再看一遍</button>
       </section>
 
       <nav className="deck-nav" aria-label="绘本页码">

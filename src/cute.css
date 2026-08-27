@@ -876,15 +876,7 @@ button:focus-visible { outline: 3px solid #70aee0; outline-offset: 4px; }
 .party-balloons i:nth-child(2) { top: 35px; left: 63px; background: #ffdb75; }
 .party-balloons i:nth-child(3) { top: -12px; right: 0; background: #8fd0b6; }
 
-.confetti { position: absolute; z-index: 12; inset: 0; overflow: hidden; pointer-events: none; }
-.confetti i { position: absolute; top: -10%; left: calc((var(--n, 1) * 2.3%) + 1%); width: 10px; height: 17px; opacity: 0; border-radius: 3px; background: var(--pink); }
-.confetti i:nth-child(3n) { background: var(--yellow); }
-.confetti i:nth-child(3n+1) { background: var(--mint); }
-.confetti i:nth-child(1) { --n: 1; } .confetti i:nth-child(2) { --n: 2; } .confetti i:nth-child(3) { --n: 3; } .confetti i:nth-child(4) { --n: 4; } .confetti i:nth-child(5) { --n: 5; } .confetti i:nth-child(6) { --n: 6; } .confetti i:nth-child(7) { --n: 7; } .confetti i:nth-child(8) { --n: 8; } .confetti i:nth-child(9) { --n: 9; } .confetti i:nth-child(10) { --n: 10; } .confetti i:nth-child(11) { --n: 11; } .confetti i:nth-child(12) { --n: 12; } .confetti i:nth-child(13) { --n: 13; } .confetti i:nth-child(14) { --n: 14; } .confetti i:nth-child(15) { --n: 15; } .confetti i:nth-child(16) { --n: 16; } .confetti i:nth-child(17) { --n: 17; } .confetti i:nth-child(18) { --n: 18; } .confetti i:nth-child(19) { --n: 19; } .confetti i:nth-child(20) { --n: 20; } .confetti i:nth-child(21) { --n: 21; } .confetti i:nth-child(22) { --n: 22; } .confetti i:nth-child(23) { --n: 23; } .confetti i:nth-child(24) { --n: 24; } .confetti i:nth-child(25) { --n: 25; } .confetti i:nth-child(26) { --n: 26; } .confetti i:nth-child(27) { --n: 27; } .confetti i:nth-child(28) { --n: 28; } .confetti i:nth-child(29) { --n: 29; } .confetti i:nth-child(30) { --n: 30; } .confetti i:nth-child(31) { --n: 31; } .confetti i:nth-child(32) { --n: 32; } .confetti i:nth-child(33) { --n: 33; } .confetti i:nth-child(34) { --n: 34; } .confetti i:nth-child(35) { --n: 35; } .confetti i:nth-child(36) { --n: 36; } .confetti i:nth-child(37) { --n: 37; } .confetti i:nth-child(38) { --n: 38; } .confetti i:nth-child(39) { --n: 39; } .confetti i:nth-child(40) { --n: 40; } .confetti i:nth-child(41) { --n: 41; } .confetti i:nth-child(42) { --n: 42; }
-.is-party .confetti i { animation: confettiFall 2.8s ease-in infinite; animation-delay: calc(var(--n) * -.08s); }
-@keyframes confettiFall { 0% { opacity: 1; transform: translateY(-5vh) rotate(0); } 100% { opacity: .9; transform: translateY(115vh) rotate(540deg); } }
-
-/* A denser, layered finale celebration */
+/* Finale interaction */
 .party-copy .candy-button {
   min-width: 270px;
   height: 70px;
@@ -896,76 +888,6 @@ button:focus-visible { outline: 3px solid #70aee0; outline-offset: 4px; }
 }
 
 .party-copy .candy-button:hover { box-shadow: 3px 3px 0 var(--brown); transform: translate(4px, 4px); }
-
-.confetti i {
-  left: var(--x);
-  width: 9px;
-  height: 21px;
-  border: 1px solid rgba(96,72,68,.18);
-  border-radius: 4px;
-}
-
-.confetti i:nth-child(4n) { width: 13px; height: 13px; border-radius: 50%; }
-.confetti i:nth-child(5n) { width: 15px; height: 8px; border-radius: 50%; background: #9ecfee; }
-
-.is-party .confetti i {
-  animation: confettiDeluxe var(--duration) linear infinite;
-  animation-delay: var(--delay);
-}
-
-@keyframes confettiDeluxe {
-  0% { opacity: 0; transform: translate3d(0,-12vh,0) rotate(0deg) scale(.7); }
-  8% { opacity: 1; }
-  52% { transform: translate3d(var(--drift),52vh,0) rotate(420deg) scale(1.08); }
-  100% { opacity: .9; transform: translate3d(var(--drift),112vh,0) rotate(860deg) scale(.82); }
-}
-
-.celebration-bursts,
-.party-ribbons { position: absolute; z-index: 11; inset: 0; overflow: hidden; pointer-events: none; }
-
-.celebration-bursts i {
-  position: absolute;
-  width: 130px;
-  height: 130px;
-  opacity: 0;
-  border: 14px dotted var(--pink);
-  border-radius: 50%;
-  box-shadow: 0 0 0 7px rgba(255,214,111,.55);
-}
-
-.celebration-bursts i:nth-child(1) { top: 11%; left: 12%; }
-.celebration-bursts i:nth-child(2) { top: 8%; right: 15%; border-color: var(--mint); animation-delay: -.5s; }
-.celebration-bursts i:nth-child(3) { top: 47%; left: 46%; border-color: var(--yellow); animation-delay: -1.1s; }
-.celebration-bursts i:nth-child(4) { right: 5%; bottom: 12%; border-color: #9ecfee; animation-delay: -1.5s; }
-.celebration-bursts i:nth-child(5) { bottom: 8%; left: 8%; border-color: var(--pink); animation-delay: -.8s; }
-.celebration-bursts i:nth-child(6) { top: 20%; left: 55%; border-color: #b4a2de; animation-delay: -1.8s; }
-.celebration-bursts i:nth-child(7) { right: 36%; bottom: 6%; border-color: var(--yellow); animation-delay: -2.2s; }
-
-.is-party .celebration-bursts i { animation: burstPop 2.6s ease-out infinite; }
-@keyframes burstPop { 0%, 16% { opacity: 0; transform: scale(.05) rotate(0); } 28% { opacity: 1; } 72%, 100% { opacity: 0; transform: scale(1.5) rotate(28deg); } }
-
-.party-ribbons i {
-  position: absolute;
-  top: -20%;
-  width: 24px;
-  height: 200px;
-  opacity: 0;
-  border-left: 7px solid var(--pink);
-  border-radius: 50%;
-}
-
-.party-ribbons i:nth-child(1) { left: 5%; }
-.party-ribbons i:nth-child(2) { left: 16%; border-color: var(--yellow); animation-delay: -.4s; }
-.party-ribbons i:nth-child(3) { left: 27%; border-color: var(--mint); animation-delay: -.8s; }
-.party-ribbons i:nth-child(4) { left: 38%; border-color: #9ecfee; animation-delay: -1.2s; }
-.party-ribbons i:nth-child(5) { left: 48%; border-color: #b5a0db; animation-delay: -1.6s; }
-.party-ribbons i:nth-child(6) { left: 59%; border-color: var(--pink); animation-delay: -2s; }
-.party-ribbons i:nth-child(7) { left: 69%; border-color: var(--yellow); animation-delay: -2.4s; }
-.party-ribbons i:nth-child(8) { left: 79%; border-color: var(--mint); animation-delay: -2.8s; }
-.party-ribbons i:nth-child(9) { left: 89%; border-color: #9ecfee; animation-delay: -3.2s; }
-.party-ribbons i:nth-child(10) { left: 97%; border-color: var(--pink); animation-delay: -3.6s; }
-.is-party .party-ribbons i { animation: ribbonDrop 4s ease-in infinite; }
-@keyframes ribbonDrop { 0% { opacity: 0; transform: translateY(-15vh) rotate(0); } 10% { opacity: 1; } 100% { opacity: .8; transform: translateY(125vh) rotate(520deg); } }
 
 .replay-cute { position: absolute; z-index: 15; right: auto; bottom: 30px; left: clamp(115px, 8vw, 150px); padding: 8px 13px; border: 2px solid var(--brown); border-radius: 999px; color: var(--brown); background: rgba(255,255,255,.8); font-size: .65rem; font-weight: 800; cursor: pointer; }
 

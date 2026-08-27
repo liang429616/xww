@@ -12,7 +12,11 @@ export const birthdayConfig = {
   herName: "小文文",
   relationshipStart: "2024-10-18",
   birthdayDate: "2026-08-31",
-  musicSrc: "",
+  // 播放顺序：第一首结束后自动播放第二首；第二首结束后回到第一首。
+  musicPlaylist: [
+    "/music/Joseph_Vincent_-_L-O-V-E_(mp3.pm).mp3",
+    "/music/IMSLP301563-PMLP02598-upload.mp3",
+  ],
   heroSubtitle: "献给我最喜欢的女孩",
   memories: [
     {
