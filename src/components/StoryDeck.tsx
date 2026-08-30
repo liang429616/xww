@@ -32,6 +32,9 @@ export function StoryDeck() {
   const [trackIndex, setTrackIndex] = useState(0);
   const [cakeStage, setCakeStage] = useState<"ready" | "lit" | "wish" | "party">("ready");
   const [memoryIndex, setMemoryIndex] = useState(0);
+  const [letterPassword, setLetterPassword] = useState("");
+  const [letterUnlocked, setLetterUnlocked] = useState(false);
+  const [letterPasswordError, setLetterPasswordError] = useState(false);
   const currentRef = useRef(getInitialPage());
   const memoryIndexRef = useRef(0);
   const wheelLocked = useRef(false);
@@ -133,6 +136,16 @@ export function StoryDeck() {
       return;
     }
     audioRef.current.play().then(() => setMusicPlaying(true)).catch(() => setMusicPlaying(false));
+  };
+
+  const unlockLetter = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (letterPassword === "251225") {
+      setLetterUnlocked(true);
+      setLetterPasswordError(false);
+      return;
+    }
+    setLetterPasswordError(true);
   };
 
   const playNextTrack = () => {
@@ -332,9 +345,9 @@ export function StoryDeck() {
         <Rainbow className="hero-rainbow" />
         <div className="sunshine" aria-hidden="true"><span>♡</span></div>
         <div className="hero-copy">
-          <span className="sticker-label">FOR MY FAVORITE GIRL</span>
+          <span className="sticker-label">FOR MY GIRL</span>
           <h1>与你有关的<br /><em>甜甜时光</em></h1>
-          <p>嗨，小寿星！<br />今天这片草地，只为你开花。</p>
+          <p>嗨，小寿星！<br />这是我送给小文文的礼物</p>
           <button className="candy-button" type="button" onClick={handleStart}>打开生日绘本 <span>→</span></button>
         </div>
         <div className="hero-characters">
@@ -368,11 +381,9 @@ export function StoryDeck() {
                 <span className="timeline-photo-number">{String(index + 1).padStart(2, "0")}</span>
               </div>
               <div className="timeline-memory-copy">
-                <span className="timeline-chapter">{memory.chapter}</span>
                 <time>{memory.date}</time>
                 <h3>{memory.title}</h3>
                 <p>{memory.text}</p>
-                <blockquote>“{memory.quote}”</blockquote>
               </div>
             </article>
           ))}
@@ -419,9 +430,9 @@ export function StoryDeck() {
           <p>数字只能数出时间，却数不完喜欢。</p>
         </div>
         <div className="balloon-stats">
-          <div className="stat-balloon balloon-pink"><strong>{Number.isFinite(days) ? days : "—"}</strong><span>相识的日夜</span><i /></div>
-          <div className="stat-balloon balloon-yellow"><strong>{config.stats.photoCount.toLocaleString()}</strong><span>一起拍的照片</span><i /></div>
-          <div className="stat-balloon balloon-mint"><strong>{config.stats.places}</strong><span>一起去的地方</span><i /></div>
+          <div className="stat-balloon balloon-pink"><strong>{config.stats.days}</strong><span>相识的日夜</span><i /></div>
+          <div className="stat-balloon balloon-yellow"><strong>{config.stats.meals}</strong><span>一起吃过的饭</span><i /></div>
+          <div className="stat-balloon balloon-mint"><strong>{config.stats.dances}</strong><span>一起跳过的舞</span><i /></div>
           <div className="stat-balloon balloon-blue"><strong>∞</strong><span>还没写完的故事</span><i /></div>
         </div>
         <div className="numbers-grass" />
@@ -438,21 +449,42 @@ export function StoryDeck() {
         </div>
         <article className="cute-letter">
           <span className="letter-pin">♡</span>
-          <p className="tiny-en">A LETTER JUST FOR YOU</p>
-          <h2>写给 {config.herName}</h2>
-          <div className="cute-letter-body">
-            <p>{config.herName}：</p>
-            {config.letter.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-          </div>
-          <footer><strong>生日快乐！</strong><span>爱你的我 · 2026</span></footer>
+          {letterUnlocked ? <>
+            <p className="tiny-en">A LETTER JUST FOR YOU</p>
+            <h2>写给 {config.herName}</h2>
+            <div className="cute-letter-body">
+              <p>{config.herName}：</p>
+              {config.letter.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            </div>
+            <footer><strong>生日快乐！</strong><span>爱你的我 · 2026</span></footer>
+          </> : <div className="letter-lock">
+            <span className="letter-lock-icon" aria-hidden="true">🔒</span>
+            <p className="tiny-en">A SECRET LETTER FOR YOU</p>
+            <h2>输入六位密码<br />打开这封信</h2>
+            <form onSubmit={unlockLetter}>
+              <input
+                aria-label="六位密码"
+                autoComplete="off"
+                inputMode="numeric"
+                maxLength={6}
+                pattern="[0-9]{6}"
+                placeholder="○ ○ ○ ○ ○ ○"
+                type="password"
+                value={letterPassword}
+                onChange={(event) => { setLetterPassword(event.target.value.replace(/\D/g, "")); setLetterPasswordError(false); }}
+              />
+              <button type="submit">打开信件 ♡</button>
+            </form>
+            {letterPasswordError && <p className="letter-password-error">密码不对哦，再想想看 ♡</p>}
+          </div>}
         </article>
       </section>
 
       <section className={`${slideClass(5)} party-slide`} aria-hidden={current !== 5}>
         <div className="party-copy">
           <span className="sticker-label">HAPPY BIRTHDAY!</span>
-          <h2>生日快乐，<br /><em>{config.herName}</em></h2>
-          <p>{cakeStage === "wish" ? "闭上眼睛，认真许一个愿望吧。" : cakeStage === "party" ? "好啦！愿望已经寄到星星那里啦！" : "愿新的一岁，有好多好多小幸运。"}</p>
+          <h2><em>{config.herName}</em><br />{'    '}生日快乐!</h2>
+          <p>{cakeStage === "wish" ? "闭上眼睛，认真许一个愿望吧。" : cakeStage === "party" ? "好啦！愿望已经寄到星星那里啦！" : "新的一岁，也要开开心心！"}</p>
           <button className="candy-button" type="button" onClick={advanceCake} disabled={cakeStage === "party"}>
             {cakeStage === "ready" ? "点亮蜡烛" : cakeStage === "lit" ? "我要许愿" : cakeStage === "wish" ? "呼——吹蜡烛" : "愿望已送达 ♡"}
           </button>
